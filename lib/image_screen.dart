@@ -30,6 +30,10 @@ class _ImageScreenState extends State<ImageScreen> with WidgetsBindingObserver {
     super.dispose();
   }
 
+  // This block of code is used in the event that the user
+  // has denied the permission forever. Detects if the permission
+  // has been granted when the user returns from the
+  // permission system screen.
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed &&
@@ -79,6 +83,9 @@ class _ImageScreenState extends State<ImageScreen> with WidgetsBindingObserver {
     );
   }
 
+  /// Check if the pick file permission is granted,
+  /// if it's not granted then request it.
+  /// If it's granted then invoke the file picker
   Future<void> _checkPermissionsAndPick() async {
     final hasFilePermission = await _model.requestFilePermission();
     if (hasFilePermission) {
@@ -86,6 +93,7 @@ class _ImageScreenState extends State<ImageScreen> with WidgetsBindingObserver {
         await _model.pickFile();
       } on Exception catch (e) {
         debugPrint('Error when picking a file: $e');
+        // Show an error to the user if the pick file failed
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('An error occurred when picking a file'),
@@ -96,6 +104,10 @@ class _ImageScreenState extends State<ImageScreen> with WidgetsBindingObserver {
   }
 }
 
+/// This widget will serve to inform the user in
+/// case the permission has been denied. There is a
+/// variable [isPermanent] to indicate whether the
+/// permission has been denied forever or not.
 class ImagePermissions extends StatelessWidget {
   final bool isPermanent;
   final VoidCallback onPressed;
@@ -130,7 +142,8 @@ class ImagePermissions extends StatelessWidget {
               right: 16.0,
             ),
             child: const Text(
-              'We need to request your permission to read local files.',
+              'We need to request your permission to read '
+              'local files in order to load it in the app.',
               textAlign: TextAlign.center,
             ),
           ),
@@ -160,6 +173,8 @@ class ImagePermissions extends StatelessWidget {
   }
 }
 
+/// This widget is simply the button to select
+/// the image from the local file system.
 class PickFile extends StatelessWidget {
   final VoidCallback onPressed;
 
@@ -177,6 +192,9 @@ class PickFile extends StatelessWidget {
       );
 }
 
+/// This widget is used once permission has
+/// been granted and a file has been selected.
+/// Load the image and display it in the center.
 class ImageLoaded extends StatelessWidget {
   final File file;
 
